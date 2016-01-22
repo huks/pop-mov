@@ -1,6 +1,7 @@
 package com.bkim.android.popularmovies;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -8,29 +9,34 @@ import android.widget.BaseAdapter;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static android.widget.ImageView.ScaleType.CENTER_CROP;
 
 public class GridViewAdapter extends BaseAdapter {
-    private final Context context;
+
+    private final String LOG_TAG = this.getClass().getSimpleName();
+
+    private Context context;
     private final List<String> urls = new ArrayList<String>();
 
     public GridViewAdapter(Context context) {
         this.context = context;
 
         // Ensure we get a different ordering of images on each run.
-        Collections.addAll(urls, Data.URLS);
-        Collections.shuffle(urls);
+//        Collections.addAll(urls, Data.URLS);
+//        Collections.shuffle(urls);
 
         // Triple up the list.
-        ArrayList<String> copy = new ArrayList<String>(urls);
-        urls.addAll(copy);
-        urls.addAll(copy);
+//        ArrayList<String> copy = new ArrayList<String>(urls);
+//        urls.addAll(copy);
+//        urls.addAll(copy);
     }
 
     @Override public View getView(int position, View convertView, ViewGroup parent) {
+
+        Log.d(LOG_TAG, "getView()");
+
         SquaredImageView view = (SquaredImageView) convertView;
         if (view == null) {
             view = new SquaredImageView(context);
@@ -39,6 +45,7 @@ public class GridViewAdapter extends BaseAdapter {
 
         // Get the image URL for the current position.
         String url = getItem(position);
+        Log.d(LOG_TAG, "url: " + url);
 
         // Trigger the download of the URL asynchronously into the image view.
         Picasso.with(context) //
@@ -63,4 +70,14 @@ public class GridViewAdapter extends BaseAdapter {
     @Override public long getItemId(int position) {
         return position;
     }
+
+    public void addFoo(String str) {
+        this.urls.add(str);
+        Log.d(LOG_TAG, "addFoo(" + str + ")");
+    }
+
+    public void clearFoo() {
+        this.urls.clear();
+    }
+
 }
