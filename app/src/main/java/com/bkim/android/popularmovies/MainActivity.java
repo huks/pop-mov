@@ -166,9 +166,10 @@ public class MainActivity extends AppCompatActivity {
             if (result != null) {
                 gvAdapter.clearFoo();
                 for (String moviesForecastStr : result) {
-                    gvAdapter.addFoo(moviesForecastStr);
+                    gvAdapter.addFoo("http://image.tmdb.org/t/p/w185/" + moviesForecastStr);
                 }
                 // New data is back from the server.
+                gvAdapter.notifyDataSetChanged();
             }
         }
     }
