@@ -72,7 +72,7 @@ public class GridViewFragment extends Fragment {
                 // Get the JSON object representing the fooMovie
                 JSONObject fooMovie = moviesArray.getJSONObject(i);
 
-                posterPath = fooMovie.getString(TMDB_POSTER_PATH); // like "\/fYzpM9GmpBlIC893fNjoWCwE24H.jpg"
+                posterPath = fooMovie.getString(TMDB_POSTER_PATH);
 
                 resultStrs[i] = posterPath;
             }
@@ -92,7 +92,7 @@ public class GridViewFragment extends Fragment {
 
             try {
                 // Construct the URL for the TMDB query
-                // http://api.themoviedb.org/3/discover/movie?sort_by=popularity.desc&api_key=ef2103eb28d0d0c1dbd0c8155064387a
+                // http://api.themoviedb.org/3/discover/movie?sort_by=popularity.desc&api_key=MY_API_KEY_HERE
                 final String TMDB_BASE_URL = "http://api.themoviedb.org/3/discover/movie?";
                 final String SORTING_PARAM = "sort_by";
                 final String APIKEY_PARMAM = "api_key";
