@@ -1,8 +1,10 @@
 package com.bkim.android.popularmovies;
 
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -44,7 +46,10 @@ public class GridViewFragment extends Fragment {
 
     private void updateMovies() {
         FetchMoviesTask moviesTask = new FetchMoviesTask();
-        moviesTask.execute();
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        String sorting = prefs.getString(
+                getString(R.string.pref_sorting_key), getString(R.string.pref_sorting_popularity));
+        moviesTask.execute(sorting);
     }
 
     @Override
@@ -53,7 +58,7 @@ public class GridViewFragment extends Fragment {
         updateMovies();
     }
 
-    private class FetchMoviesTask extends AsyncTask<Void, Void, String[]> {
+    private class FetchMoviesTask extends AsyncTask<String, Void, String[]> {
         private final String LOG_TAG = FetchMoviesTask.class.getSimpleName();
 
         // These are the names of the JSON objects that need to be extracted.
@@ -81,7 +86,13 @@ public class GridViewFragment extends Fragment {
         }
 
         @Override
-        protected String[] doInBackground(Void... params) {
+        protected String[] doInBackground(String... params) {
+
+            // If there's no SORTING_PARAM...
+            if (params.length == 0) {
+                return null;
+            }
+
             // These two need to be declared outside the try/catch
             // so that they can be closed in the finally block.
             HttpURLConnection urlConnection = null;
@@ -98,7 +109,7 @@ public class GridViewFragment extends Fragment {
                 final String APIKEY_PARMAM = "api_key";
 
                 Uri builtUri = Uri.parse(TMDB_BASE_URL).buildUpon()
-                        .appendQueryParameter(SORTING_PARAM, "popularity.desc")
+                        .appendQueryParameter(SORTING_PARAM, params[0])
                         .appendQueryParameter(APIKEY_PARMAM, BuildConfig.TMDB_API_KEY)
                         .build();
 
