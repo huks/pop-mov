@@ -1,5 +1,6 @@
 package com.bkim.android.popularmovies;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -10,6 +11,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.GridView;
 
 import org.json.JSONArray;
@@ -22,6 +24,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 
 public class GridViewFragment extends Fragment {
     private GridViewAdapter gvAdapter;
@@ -31,15 +34,29 @@ public class GridViewFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        final String LOG_TAG = GridViewFragment.class.getSimpleName();
+
+        ArrayList<MovieData> movieDataArrayList = new ArrayList<MovieData>();
+
         // The GridViewAdapter will take data from a source and
         // use it to populate the GridView it's attached to.
-        gvAdapter = new GridViewAdapter(getActivity());
+        gvAdapter = new GridViewAdapter(getActivity(), R.layout.grid_view_activity, movieDataArrayList);
 
         View rootView = inflater.inflate(R.layout.grid_view_activity, container, false);
 
         // Get a reference to the GridView, and attached this adapter to it.
         GridView gv = (GridView) rootView.findViewById(R.id.grid_view);
         gv.setAdapter(gvAdapter);
+        gv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                MovieData movieData = gvAdapter.getItem(position);
+                Log.d(LOG_TAG, "click: " + movieData.toString());
+                Intent intent = new Intent(getActivity(), DetailActivity.class)
+                        .putExtra("movieData", movieData);
+                startActivity(intent);
+            }
+        });
 
         return rootView;
     }
@@ -58,18 +75,18 @@ public class GridViewFragment extends Fragment {
         updateMovies();
     }
 
-    private class FetchMoviesTask extends AsyncTask<String, Void, String[]> {
+    private class FetchMoviesTask extends AsyncTask<String, Void, ArrayList<MovieData>> {
         private final String LOG_TAG = FetchMoviesTask.class.getSimpleName();
 
         // These are the names of the JSON objects that need to be extracted.
         final String TMDB_RESULTS = "results";
         final String TMDB_POSTER_PATH = "poster_path";
 
-        private String[] getMoviesDataFromJson(String moviesJsonStr) throws JSONException {
+        private ArrayList<MovieData> getMoviesDataFromJson(String moviesJsonStr) throws JSONException {
             JSONObject moviesJson = new JSONObject(moviesJsonStr);
             JSONArray moviesArray = moviesJson.getJSONArray(TMDB_RESULTS);
 
-            String[] resultStrs = new String[moviesArray.length()];
+            ArrayList<MovieData> movieDataArrayList = new ArrayList<MovieData>();
 
             for (int i = 0; i < moviesArray.length(); i++) {
                 String posterPath;
@@ -79,14 +96,17 @@ public class GridViewFragment extends Fragment {
 
                 posterPath = fooMovie.getString(TMDB_POSTER_PATH);
 
-                resultStrs[i] = posterPath;
-            }
-            return resultStrs;
+                MovieData movieData = new MovieData("original_title", posterPath, "overview", 50, "release_date");
 
+                movieDataArrayList.add(movieData);
+                Log.d(LOG_TAG, movieData.toString());
+            }
+            Log.d(LOG_TAG, movieDataArrayList.toString());
+            return movieDataArrayList;
         }
 
         @Override
-        protected String[] doInBackground(String... params) {
+        protected ArrayList<MovieData> doInBackground(String... params) {
 
             // If there's no SORTING_PARAM...
             if (params.length == 0) {
@@ -114,6 +134,8 @@ public class GridViewFragment extends Fragment {
                         .build();
 
                 URL url = new URL(builtUri.toString());
+
+                Log.d(LOG_TAG, "Query: " + url.toString());
 
                 // Create the request to TMDB, and open the connection
                 urlConnection = (HttpURLConnection) url.openConnection();
@@ -173,12 +195,14 @@ public class GridViewFragment extends Fragment {
         }
 
         @Override
-        protected void onPostExecute(String[] result) {
-            if (result != null) {
-                gvAdapter.clearFoo();
-                for (String mStr : result) {
-                    gvAdapter.addFoo(mStr);
+        protected void onPostExecute(ArrayList<MovieData> movieDataArrayList) {
+            if (movieDataArrayList != null) {
+                gvAdapter.clear();
+
+                for (int i = 0 ; i < movieDataArrayList.size() ; i++ ) {
+                    gvAdapter.add(movieDataArrayList.get(i));
                 }
+
                 // New data is back from the server.
                 gvAdapter.notifyDataSetChanged();
             }
