@@ -51,7 +51,6 @@ public class GridViewFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 MovieData movieData = gvAdapter.getItem(position);
-                Log.d(LOG_TAG, "click: " + movieData.toString());
                 Intent intent = new Intent(getActivity(), DetailActivity.class)
                         .putExtra("movieData", movieData);
                 startActivity(intent);
@@ -80,7 +79,11 @@ public class GridViewFragment extends Fragment {
 
         // These are the names of the JSON objects that need to be extracted.
         final String TMDB_RESULTS = "results";
+        final String TMDM_ORIGINAL_TITLE = "original_title";
         final String TMDB_POSTER_PATH = "poster_path";
+        final String TMDB_OVERVIEW = "overview";
+        final String TMDB_VOTE_AVERAGE = "vote_average";
+        final String TMDB_RELEASE_DATE = "release_date";
 
         private ArrayList<MovieData> getMoviesDataFromJson(String moviesJsonStr) throws JSONException {
             JSONObject moviesJson = new JSONObject(moviesJsonStr);
@@ -89,19 +92,26 @@ public class GridViewFragment extends Fragment {
             ArrayList<MovieData> movieDataArrayList = new ArrayList<MovieData>();
 
             for (int i = 0; i < moviesArray.length(); i++) {
+                String originalTitle;
                 String posterPath;
+                String overview;
+                int voteAverage;
+                int voteCount; // for better highest rated sorting
+                String releaseDate;
 
                 // Get the JSON object representing the fooMovie
                 JSONObject fooMovie = moviesArray.getJSONObject(i);
 
+                originalTitle = fooMovie.getString(TMDM_ORIGINAL_TITLE);
                 posterPath = fooMovie.getString(TMDB_POSTER_PATH);
+                overview = fooMovie.getString(TMDB_OVERVIEW);
+                voteAverage = fooMovie.getInt(TMDB_VOTE_AVERAGE);
+                releaseDate = fooMovie.getString(TMDB_RELEASE_DATE);
 
-                MovieData movieData = new MovieData("original_title", posterPath, "overview", 50, "release_date");
+                MovieData movieData = new MovieData(originalTitle, posterPath, overview, voteAverage, releaseDate);
 
                 movieDataArrayList.add(movieData);
-                Log.d(LOG_TAG, movieData.toString());
             }
-            Log.d(LOG_TAG, movieDataArrayList.toString());
             return movieDataArrayList;
         }
 
@@ -126,6 +136,8 @@ public class GridViewFragment extends Fragment {
                 // http://api.themoviedb.org/3/discover/movie?sort_by=popularity.desc&api_key=MY_API_KEY_HERE
                 final String TMDB_BASE_URL = "http://api.themoviedb.org/3/discover/movie?";
                 final String SORTING_PARAM = "sort_by";
+                final String VOTE_COUNT_PARAM = "vote_count.gte";
+                final int MIN_VOTE_COUNT = 50;
                 final String APIKEY_PARMAM = "api_key";
 
                 Uri builtUri = Uri.parse(TMDB_BASE_URL).buildUpon()
@@ -133,9 +145,18 @@ public class GridViewFragment extends Fragment {
                         .appendQueryParameter(APIKEY_PARMAM, BuildConfig.TMDB_API_KEY)
                         .build();
 
-                URL url = new URL(builtUri.toString());
+                // For better sorting higest-rated movies
+                if (params[0].equals("vote_average.desc")) {
+                    builtUri = Uri.parse(TMDB_BASE_URL).buildUpon()
+                            .appendQueryParameter(SORTING_PARAM, params[0])
+                            .appendQueryParameter(VOTE_COUNT_PARAM, String.valueOf(MIN_VOTE_COUNT))
+                            .appendQueryParameter(APIKEY_PARMAM, BuildConfig.TMDB_API_KEY)
+                            .build();
+                } else {
+                    // do nothing
+                }
 
-                Log.d(LOG_TAG, "Query: " + url.toString());
+                URL url = new URL(builtUri.toString());
 
                 // Create the request to TMDB, and open the connection
                 urlConnection = (HttpURLConnection) url.openConnection();

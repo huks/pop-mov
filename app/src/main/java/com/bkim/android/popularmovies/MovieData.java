@@ -11,7 +11,7 @@ public class MovieData implements Parcelable {
     String release_date; // release date
 
     private static final String BASE = "http://image.tmdb.org/t/p/";
-    private static final String SIZE = "w185/";
+    private static final String SIZE = "w185/"; // size: "w92", "w154", "w185", "w342", "w500", "w780", or "original". For most phones using “w185”is recommended.
 
     public MovieData() { }
 
@@ -28,7 +28,7 @@ public class MovieData implements Parcelable {
         poster_path = in.readString();
         overview = in.readString();
         vote_average = in.readInt();
-        release_date = in.readString();
+        release_date = "(" + in.readString() + ")";
     }
 
     @Override
