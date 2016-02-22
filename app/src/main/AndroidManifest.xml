@@ -33,6 +33,9 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.bkim.android.popularmovies.MainActivity" />
         </activity>
+        <provider
+            android:authorities="com.bkim.android.popularmovies.app"
+            android:name=".data.MovieProvider" />
     </application>
 
 </manifest>
