@@ -28,8 +28,9 @@ public class TestDb extends AndroidTestCase {
         // build a HashSet of all of the table names we wish to look for
         // Note that there will be another table in thd DB that stores the
         // Android metadata (db version information)
-        final HashSet<String> tableNameHashSet = new HashSet<>();
+        final HashSet<String> tableNameHashSet = new HashSet<String>();
         tableNameHashSet.add(MovieContract.MovieEntry.TABLE_NAME);
+        tableNameHashSet.add(MovieContract.MovieDetailsEntry.TABLE_NAME);
 
         mContext.deleteDatabase(MovieDbHelper.DATABASE_NAME);
         SQLiteDatabase db = new MovieDbHelper(
@@ -49,7 +50,7 @@ public class TestDb extends AndroidTestCase {
         // if this fails, it means that your database doesn't contain the movie entry table
         assertTrue("Error: Your database was created without the movie entry table", tableNameHashSet.isEmpty());
 
-        // now, do our table contains the correct columns?
+        // now, do our table contains the correct columns? : MovieEntry table
         c = db.rawQuery("PRAGMA table_info(" + MovieContract.MovieEntry.TABLE_NAME + ")",
                 null);
 
@@ -78,20 +79,24 @@ public class TestDb extends AndroidTestCase {
         db.close();
     }
 
-    public void testMovieTable() {
+    public void testMovieTable() { insertMovie(); }
+
+    public void testMovieDetailsTable() {
+
+        long movieRowId = insertMovie();
+
+        assertFalse("Error: Movie Not Inserted Correctly", movieRowId == -1L);
 
         MovieDbHelper dbHelper = new MovieDbHelper(mContext);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
-        ContentValues testValues = TestUtilities.createSampleMovieValues();
+        ContentValues mDetailsValues = TestUtilities.createMovieDetailsValues(movieRowId);
 
-        long movieRowId;
-        movieRowId = db.insert(MovieContract.MovieEntry.TABLE_NAME, null, testValues);
+        long mDetailsRowId = db.insert(MovieContract.MovieDetailsEntry.TABLE_NAME, null, mDetailsValues);
+        assertTrue(mDetailsRowId != -1);
 
-        assertTrue(movieRowId != -1);
-
-        Cursor cursor = db.query(
-                MovieContract.MovieEntry.TABLE_NAME,  // table to query
+        Cursor mDetailsCursor = db.query(
+                MovieContract.MovieDetailsEntry.TABLE_NAME,  // table to query
                 null,  // all columns
                 null,  // columns for the "where" clause
                 null,  // values for the "where" clause
@@ -100,15 +105,49 @@ public class TestDb extends AndroidTestCase {
                 null  // sort order
         );
 
-        assertTrue( "Error: No Records returned from movie query", cursor.moveToFirst());
+        assertTrue("Error: No Records returned from movie details query", mDetailsCursor.moveToFirst());
 
-        TestUtilities.validateCurrentRecord("Error: Location Query Validation Failed",
+        TestUtilities.validateCurrentRecord("testInsertReadDb movieDetailsEntry failed to validate",
+                mDetailsCursor, mDetailsValues);
+
+        assertFalse("Error: More than one record returned from movie details query",
+                mDetailsCursor.moveToNext());
+
+        mDetailsCursor.close();
+        db.close();
+    }
+
+    public long insertMovie() {
+        MovieDbHelper dbHelper = new MovieDbHelper(mContext);
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+        ContentValues testValues = TestUtilities.createDeadpoolMovieValues();
+
+        long movieRowId;
+        movieRowId = db.insert(MovieContract.MovieEntry.TABLE_NAME, null, testValues);
+
+        assertTrue(movieRowId != -1);
+
+        Cursor cursor = db.query(
+                MovieContract.MovieEntry.TABLE_NAME,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+
+        assertTrue("Error: No Records returned from movie query", cursor.moveToFirst());
+
+        TestUtilities.validateCurrentRecord("Error: Movie Query Validation Failed",
                 cursor, testValues);
 
-        assertFalse( "Error: More than one record returned from movie query",
-                cursor.moveToNext() );
+        assertFalse("Error: More than one record returend from movie query",
+                cursor.moveToNext());
 
         cursor.close();
         db.close();
+        return movieRowId;
     }
 }

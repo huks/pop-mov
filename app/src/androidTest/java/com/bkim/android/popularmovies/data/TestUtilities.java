@@ -1,8 +1,10 @@
 package com.bkim.android.popularmovies.data;
 
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.ContentObserver;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -34,17 +36,39 @@ public class TestUtilities extends AndroidTestCase {
         }
     }
 
-    /* Default movie values for the database tests. */
-    static ContentValues createSampleMovieValues() {
-        ContentValues movieValues = new ContentValues();
-        movieValues.put(MovieContract.MovieEntry.COLUMN_MOVIE_ID, 293660);
-        movieValues.put(MovieContract.MovieEntry.COLUMN_TITLE, "Deadpool");
-        movieValues.put(MovieContract.MovieEntry.COLUMN_POSTER, "\\/inVq3FRqcYIRl2la8iZikYYxFNR.jpg");
-        movieValues.put(MovieContract.MovieEntry.COLUMN_SYNOPSIS, "Based upon Marvel Comics’ most unconventional anti-hero, DEADPOOL tells the origin story of former Special Forces operative turned mercenary Wade Wilson, who after being subjected to a rogue experiment that leaves him with accelerated healing powers, adopts the alter ego Deadpool. Armed with his new abilities and a dark, twisted sense of humor, Deadpool hunts down the man who nearly destroyed his life.");
-        movieValues.put(MovieContract.MovieEntry.COLUMN_RATING, 7.23);
-        movieValues.put(MovieContract.MovieEntry.COLUMN_DATE, "2016-02-09");
+    static ContentValues createMovieDetailsValues(long movieRowId) {
+        ContentValues mDetailsValues = new ContentValues();
+        mDetailsValues.put(MovieContract.MovieDetailsEntry.COLUMN_MOV_KEY, movieRowId);
+        mDetailsValues.put(MovieContract.MovieDetailsEntry.COLUMN_TRAILER, "foo_trailer");
+        mDetailsValues.put(MovieContract.MovieDetailsEntry.COLUMN_REVIEW, "foo_review");
 
-        return movieValues;
+        return mDetailsValues;
+    }
+
+    /* Default movie values for the database tests. */
+    static ContentValues createDeadpoolMovieValues() {
+        ContentValues testValues = new ContentValues();
+        testValues.put(MovieContract.MovieEntry.COLUMN_MOVIE_ID, 293660);
+        testValues.put(MovieContract.MovieEntry.COLUMN_TITLE, "Deadpool");
+        testValues.put(MovieContract.MovieEntry.COLUMN_POSTER, "\\/inVq3FRqcYIRl2la8iZikYYxFNR.jpg");
+        testValues.put(MovieContract.MovieEntry.COLUMN_SYNOPSIS, "Based upon Marvel Comics’ most unconventional anti-hero, DEADPOOL tells the origin story of former Special Forces operative turned mercenary Wade Wilson, who after being subjected to a rogue experiment that leaves him with accelerated healing powers, adopts the alter ego Deadpool. Armed with his new abilities and a dark, twisted sense of humor, Deadpool hunts down the man who nearly destroyed his life.");
+        testValues.put(MovieContract.MovieEntry.COLUMN_RATING, 7.23);
+        testValues.put(MovieContract.MovieEntry.COLUMN_DATE, "2016-02-09");
+
+        return testValues;
+    }
+
+    static long insertDeadpoolMovieValues(Context context) {
+        MovieDbHelper dbHelper = new MovieDbHelper(context);
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        ContentValues testValues = TestUtilities.createDeadpoolMovieValues();
+
+        long movieRowId;
+        movieRowId = db.insert(MovieContract.MovieEntry.TABLE_NAME, null, testValues);
+
+        assertTrue("Error: Failure to insert Deadpool Movie Values", movieRowId != -1);
+
+        return movieRowId;
     }
 
     /*

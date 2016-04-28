@@ -14,6 +14,7 @@ public class MovieProvider extends ContentProvider {
     private MovieDbHelper mOpenHelper;
 
     static final int MOVIE = 100;
+    static final int MOVIE_DETAILS = 200;
 
     static UriMatcher buildUriMatcher() {
         // The code passed into the constructor represents the code to return for the root URI.
@@ -23,6 +24,8 @@ public class MovieProvider extends ContentProvider {
 
         // For each type of URI you want to add, create a corresponding code.
         matcher.addURI(authority, MovieContract.PATH_MOVIE, MOVIE);
+
+        matcher.addURI(authority, MovieContract.PATH_MOVIE_DETAILS, MOVIE_DETAILS);
 
         return matcher;
     }
@@ -42,6 +45,8 @@ public class MovieProvider extends ContentProvider {
         switch (match) {
             case MOVIE:
                 return MovieContract.MovieEntry.CONTENT_TYPE;
+            case MOVIE_DETAILS:
+                return MovieContract.MovieDetailsEntry.CONTENT_TYPE;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -62,6 +67,19 @@ public class MovieProvider extends ContentProvider {
                         sortOrder);
                 break;
             }
+            case MOVIE_DETAILS: {
+                retCursor = mOpenHelper.getReadableDatabase().query(
+                        MovieContract.MovieDetailsEntry.TABLE_NAME,
+                        projection,
+                        selection,
+                        selectionArgs,
+                        null,
+                        null,
+                        sortOrder
+
+                );
+                break;
+            }
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -72,7 +90,6 @@ public class MovieProvider extends ContentProvider {
 
     @Override
     public Uri insert(Uri uri, ContentValues values) {
-
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         final int match = sUriMatcher.match(uri);
         Uri returnUri;
@@ -81,9 +98,17 @@ public class MovieProvider extends ContentProvider {
             case MOVIE: {
                 long _id = db.insert(MovieContract.MovieEntry.TABLE_NAME, null, values);
                 if ( _id > 0 ) {
-                    returnUri = MovieContract.MovieEntry.buildMovieUri(_id);
+                    returnUri = MovieContract.MovieEntry.buildMovieUri();
+                } else {
+                    throw new android.database.SQLException("Failed to insert row into " + uri);
                 }
-                else {
+                break;
+            }
+            case MOVIE_DETAILS: {
+                long _id = db.insert(MovieContract.MovieDetailsEntry.TABLE_NAME, null, values);
+                if (_id > 0 ) {
+                    returnUri = MovieContract.MovieDetailsEntry.buildMovieDetailsUri(_id);
+                } else {
                     throw new android.database.SQLException("Failed to insert row into " + uri);
                 }
                 break;
@@ -108,6 +133,9 @@ public class MovieProvider extends ContentProvider {
             case MOVIE:
                 rowsDeleted = db.delete(MovieContract.MovieEntry.TABLE_NAME, selection, selectionArgs);
                 break;
+            case MOVIE_DETAILS:
+                rowsDeleted = db.delete(MovieContract.MovieDetailsEntry.TABLE_NAME, selection, selectionArgs);
+                break;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -129,6 +157,9 @@ public class MovieProvider extends ContentProvider {
             case MOVIE:
                 rowsUpdated = db.update(MovieContract.MovieEntry.TABLE_NAME, values, selection, selectionArgs);
                 break;
+            case MOVIE_DETAILS:
+                rowsUpdated = db.update(MovieContract.MovieDetailsEntry.TABLE_NAME, values, selection, selectionArgs);
+                break;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -136,5 +167,31 @@ public class MovieProvider extends ContentProvider {
             getContext().getContentResolver().notifyChange(uri, null);
         }
         return rowsUpdated;
+    }
+
+    @Override
+    public int bulkInsert(Uri uri, ContentValues[] values) {
+        final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        final int match = sUriMatcher.match(uri);
+        switch (match) {
+            case MOVIE_DETAILS:
+                db.beginTransaction();
+                int returnCount = 0;
+                try {
+                    for (ContentValues value : values) {
+                        long _id = db.insert(MovieContract.MovieDetailsEntry.TABLE_NAME, null, value);
+                        if (_id != -1) {
+                            returnCount++;
+                        }
+                    }
+                    db.setTransactionSuccessful();
+                } finally {
+                    db.endTransaction();
+                }
+                getContext().getContentResolver().notifyChange(uri, null);
+                return returnCount;
+            default:
+                return super.bulkInsert(uri, values);
+        }
     }
 }

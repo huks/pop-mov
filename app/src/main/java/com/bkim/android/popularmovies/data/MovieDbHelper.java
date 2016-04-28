@@ -5,6 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.bkim.android.popularmovies.data.MovieContract.MovieEntry;
+import com.bkim.android.popularmovies.data.MovieContract.MovieDetailsEntry;
 
 /**
  * Manages a local database for movies data
@@ -12,7 +13,7 @@ import com.bkim.android.popularmovies.data.MovieContract.MovieEntry;
 public class MovieDbHelper extends SQLiteOpenHelper {
 
     // if you change the database schema, you must increment the database version.
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
 
     static final String DATABASE_NAME = "movie.db";
 
@@ -24,19 +25,28 @@ public class MovieDbHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase sqLiteDatabases) {
         // Create a table to hold movie data...
         final String SQL_CREATE_MOVIE_TABLE = "CREATE TABLE " + MovieEntry.TABLE_NAME + " (" +
-                MovieEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                MovieEntry.COLUMN_MOVIE_ID + " INTEGER NOT NULL, " + // has to be unique here?
+                MovieEntry._ID + " INTEGER PRIMARY KEY, " +
+                MovieEntry.COLUMN_MOVIE_ID + " INTEGER UNIQUE NOT NULL, " +
                 MovieEntry.COLUMN_TITLE + " TEXT NOT NULL, " +
                 MovieEntry.COLUMN_POSTER + " TEXT, " +
                 MovieEntry.COLUMN_SYNOPSIS + " TEXT, " +
                 MovieEntry.COLUMN_RATING + " INTEGER, " +
-                MovieEntry.COLUMN_DATE + " TEXT, " +
+                MovieEntry.COLUMN_DATE + " TEXT " +
+                " );";
 
-                // To assure the application have just one unique movie,
-                // it's created a UNIQUE constraint with REPLACE strategy
-                " UNIQUE (" + MovieEntry.COLUMN_MOVIE_ID + ") ON CONFLICT REPLACE);";
+        final String SQL_CREATE_MOVIE_DETAILS_TABLE = "CREATE TABLE " + MovieDetailsEntry.TABLE_NAME + " (" +
+                MovieDetailsEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                MovieDetailsEntry.COLUMN_MOV_KEY + " INTEGER NOT NULL, " +
+                MovieDetailsEntry.COLUMN_TRAILER + " TEXT NOT NULL, " +
+                MovieDetailsEntry.COLUMN_REVIEW + " TEXT NOT NULL, " +
+
+                " FOREIGN KEY (" + MovieDetailsEntry.COLUMN_MOV_KEY + ") REFERENCES " +
+                MovieEntry.TABLE_NAME + " (" + MovieEntry._ID + "), " +
+
+                " UNIQUE (" + MovieDetailsEntry.COLUMN_MOV_KEY + ") ON CONFLICT REPLACE);";
 
         sqLiteDatabases.execSQL(SQL_CREATE_MOVIE_TABLE);
+        sqLiteDatabases.execSQL(SQL_CREATE_MOVIE_DETAILS_TABLE);
     }
 
     @Override
@@ -48,6 +58,7 @@ public class MovieDbHelper extends SQLiteOpenHelper {
         // If you want to update the schema without wiping data, commenting out the next 2 lines
         // should be your top priority before modifying this method.
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + MovieEntry.TABLE_NAME);
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + MovieDetailsEntry.TABLE_NAME);
         onCreate(sqLiteDatabase);
     }
 }
