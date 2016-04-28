@@ -4,11 +4,9 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.DatabaseUtils;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.ArrayAdapter;
 
 import com.bkim.android.popularmovies.data.MovieContract;
 import com.bkim.android.popularmovies.data.MovieContract.MovieEntry;
@@ -28,16 +26,16 @@ import java.util.Vector;
 /**
  * Created by bjkim on 2016-04-27.
  */
-public class FetchMovieTask extends AsyncTask<String, Void, String[]> {
+public class FetchMovieTask extends AsyncTask<String, Void, Void> {
 
     private final String LOG_TAG = FetchMovieTask.class.getSimpleName();
 
-    private ArrayAdapter<String> mBoxOfficeAdapter;
+//    private ArrayAdapter<String> mBoxofficeAdapter;
     private final Context mContext;
 
-    public FetchMovieTask(Context context, ArrayAdapter<String> boxOfficeAdapter) {
+    public FetchMovieTask(Context context) {
         mContext = context;
-        mBoxOfficeAdapter = boxOfficeAdapter;
+//        mBoxofficeAdapter = boxofficeAdapter;
     }
 
     private boolean DEBUG = true;
@@ -74,20 +72,20 @@ public class FetchMovieTask extends AsyncTask<String, Void, String[]> {
         return movId;
     }
 
-    String[] convertContentValuesToUXFormat(Vector<ContentValues> cvv) {
-        // return strings to keep UI functional for now
-        String[] resultStrs = new String[cvv.size()];
-        for ( int i = 0; i < cvv.size(); i++ ) {
-            ContentValues movieValues = cvv.elementAt(i);
-            resultStrs[i] = movieValues.getAsString(MovieEntry.COLUMN_TITLE);
-        }
-        return resultStrs;
-    }
+//    String[] convertContentValuesToUXFormat(Vector<ContentValues> cvv) {
+//        // return strings to keep UI functional for now
+//        String[] resultStrs = new String[cvv.size()];
+//        for ( int i = 0; i < cvv.size(); i++ ) {
+//            ContentValues movieValues = cvv.elementAt(i);
+//            resultStrs[i] = movieValues.getAsString(MovieEntry.COLUMN_TITLE);
+//        }
+//        return resultStrs;
+//    }
 
-    private String[] getMovieDataFromJson(String boxOfficeJsonStr, String sortSetting) throws JSONException {
+    private void getMovieDataFromJson(String boxofficeJsonStr, String sortSetting) throws JSONException {
 
         // These are the names of the JSON objects that need to be extracted.
-        final String TMDB_RESULTS = "results"; // "BoxOffice" list
+        final String TMDB_RESULTS = "results"; // "Boxoffice" list
         final String TMDB_ID = "id";
         final String TMDB_ORIGINAL_TITLE = "original_title";
         final String TMDB_POSTER_PATH = "poster_path";
@@ -96,8 +94,8 @@ public class FetchMovieTask extends AsyncTask<String, Void, String[]> {
         final String TMDB_RELEASE_DATE = "release_date";
 
         try {
-            JSONObject boxOffice = new JSONObject(boxOfficeJsonStr);
-            JSONArray movieArray = boxOffice.getJSONArray(TMDB_RESULTS);
+            JSONObject boxoffice = new JSONObject(boxofficeJsonStr);
+            JSONArray movieArray = boxoffice.getJSONArray(TMDB_RESULTS);
 
             // Insert the new movie information into the...
             Vector<ContentValues> cvVector = new Vector<ContentValues>(movieArray.length());
@@ -133,43 +131,25 @@ public class FetchMovieTask extends AsyncTask<String, Void, String[]> {
                 cvVector.add(movieValues);
             }
 
+            int inserted = 0;
+
             // add to database
             if (cvVector.size() > 0) {
                 ContentValues[] cvArray = new ContentValues[cvVector.size()];
                 cvVector.toArray(cvArray);
-                mContext.getContentResolver().bulkInsert(MovieEntry.CONTENT_URI, cvArray);
+
+                inserted = mContext.getContentResolver().bulkInsert(MovieEntry.CONTENT_URI, cvArray);
             }
-
-            // Sort order?
-//            String sortOrder = MovieEntry.COLUMN_RATING + " DESC";
-            Uri movieUri = MovieEntry.buildMovieUri();
-
-            // Display what you stored in the bulkInsert
-            Cursor cursor = mContext.getContentResolver().query(movieUri, null, null, null, null);
-
-            cvVector = new Vector<ContentValues>(cursor.getCount());
-            if (cursor.moveToFirst()) {
-                do {
-                    ContentValues cv = new ContentValues();
-                    DatabaseUtils.cursorRowToContentValues(cursor, cv);
-                    cvVector.add(cv);
-                } while (cursor.moveToNext());
-            }
-
-            Log.d(LOG_TAG, "FetchMovieTask Complete. " + cvVector.size() + " Inserted");
-
-            String[] resultStrs = convertContentValuesToUXFormat(cvVector);
-            return resultStrs;
 
         } catch (JSONException e) {
             Log.e(LOG_TAG, e.getMessage(), e);
             e.printStackTrace();
         }
-        return null;
+
     }
 
     @Override
-    protected String[] doInBackground(String... params) {
+    protected Void doInBackground(String... params) {
 
         // If there's no SORTING_PARAM(like "popularity.desc"), return null. Verify size of params.
         if (params.length == 0) {
@@ -183,7 +163,7 @@ public class FetchMovieTask extends AsyncTask<String, Void, String[]> {
         BufferedReader reader = null;
 
         // Will contain the raw JSON response as a string
-        String boxOfficeJsonStr = null;
+        String boxofficeJsonStr = null;
 
         try {
             // Construct the URL for the TMDB query
@@ -238,13 +218,16 @@ public class FetchMovieTask extends AsyncTask<String, Void, String[]> {
                 // Stream was empty.  No point in parsing.
                 return null;
             }
-            boxOfficeJsonStr = buffer.toString();
+            boxofficeJsonStr = buffer.toString();
+            getMovieDataFromJson(boxofficeJsonStr, sortQuery);
 
         } catch (IOException e) {
             Log.e(LOG_TAG, "Error ", e);
-            // If the code didn't successfully get the weather data, there's no point in attemping
+            // If the code didn't successfully get the weather data, there's no point in attempting
             // to parse it.
-            return null;
+        } catch (JSONException e) {
+            Log.e(LOG_TAG, e.getMessage(), e);
+            e.printStackTrace();
         } finally {
             if (urlConnection != null) {
                 urlConnection.disconnect();
@@ -257,25 +240,6 @@ public class FetchMovieTask extends AsyncTask<String, Void, String[]> {
                 }
             }
         }
-
-        try {
-            return getMovieDataFromJson(boxOfficeJsonStr, sortQuery);
-        } catch (JSONException e) {
-            Log.e(LOG_TAG, e.getMessage(), e);
-            e.printStackTrace();
-        }
-
-        // This will only happen if there was an error getting or parsing TMDB.
         return null;
-    }
-
-    @Override
-    protected void onPostExecute(String[] result) {
-        if (result != null && mBoxOfficeAdapter != null) {
-            mBoxOfficeAdapter.clear();
-            for (String fooMovie : result) {
-                mBoxOfficeAdapter.add(fooMovie);
-            }
-        }
     }
 }

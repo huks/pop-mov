@@ -18,7 +18,7 @@ public class TestFetchMovieTask extends AndroidTestCase{
                 MovieContract.MovieDetailsEntry.COLUMN_MOV_KEY + " = ?",
                 new String[]{String.valueOf(ADD_MOV_KEY)});
 
-        FetchMovieTask fmt = new FetchMovieTask(getContext(), null);
+        FetchMovieTask fmt = new FetchMovieTask(getContext());
         long movId = fmt.addMovieDetails(ADD_MOV_KEY, ADD_TRAILER, ADD_REVIEW);
 
         // does addMovieDetails return a valid record ID?
