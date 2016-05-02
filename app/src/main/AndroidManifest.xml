@@ -34,7 +34,7 @@
                 android:value="com.bkim.android.popularmovies.MainActivity" />
         </activity>
         <provider
-            android:authorities="com.bkim.android.popularmovies.app"
+            android:authorities="com.bkim.android.popularmovies"
             android:name=".data.MovieProvider" />
     </application>
 

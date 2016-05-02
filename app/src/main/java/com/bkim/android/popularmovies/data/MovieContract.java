@@ -6,14 +6,14 @@ import android.net.Uri;
 import android.provider.BaseColumns;
 
 /**
- * Defines table and columns names for the movie database.
+ * Defines table and columns names for the movie database.RARRRRRRRRR
  */
 public class MovieContract {
 
     // The "Content Authority" is a name for the entire content provider, similar to the
     // relationship between a domain name and its website. A convenient string to use for the
     // content authority is the package name for the app, which is guaranteed to be unique on the device.
-    public static final String CONTENT_AUTHORITY = "com.bkim.android.popularmovies.app";
+    public static final String CONTENT_AUTHORITY = "com.bkim.android.popularmovies";
 
     // Use CONTENT_AUTHORITY to create the base of all URI's which apps will use to contact
     // the content provider.

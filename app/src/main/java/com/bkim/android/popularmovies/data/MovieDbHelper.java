@@ -13,7 +13,7 @@ import com.bkim.android.popularmovies.data.MovieContract.MovieDetailsEntry;
 public class MovieDbHelper extends SQLiteOpenHelper {
 
     // if you change the database schema, you must increment the database version.
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 5;
 
     static final String DATABASE_NAME = "movie.db";
 
