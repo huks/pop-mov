@@ -6,7 +6,7 @@ import android.net.Uri;
 import android.provider.BaseColumns;
 
 /**
- * Defines table and columns names for the movie database.RARRRRRRRRR
+ * Defines table and columns names for the movie database.
  */
 public class MovieContract {
 
