@@ -9,7 +9,7 @@ import com.bkim.android.popularmovies.data.MovieContract;
  * Created by bjkim on 2016-04-28.
  */
 public class TestFetchMovieTask extends AndroidTestCase{
-    static final int ADD_MOV_KEY = 1234;
+    static final int ADD_MOV_KEY = 293660;
     static final String ADD_TRAILER = "foo_trailer";
     static final String ADD_REVIEW = "foo_review";
 

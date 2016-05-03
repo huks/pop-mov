@@ -41,7 +41,7 @@ public class MovieDbHelper extends SQLiteOpenHelper {
                 MovieDetailsEntry.COLUMN_REVIEW + " TEXT NOT NULL, " +
 
                 " FOREIGN KEY (" + MovieDetailsEntry.COLUMN_MOV_KEY + ") REFERENCES " +
-                MovieEntry.TABLE_NAME + " (" + MovieEntry._ID + "), " +
+                MovieEntry.TABLE_NAME + " (" + MovieEntry.COLUMN_MOVIE_ID + "), " +
 
                 " UNIQUE (" + MovieDetailsEntry.COLUMN_MOV_KEY + ") ON CONFLICT REPLACE);";
 

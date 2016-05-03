@@ -9,6 +9,8 @@ import android.net.Uri;
 
 public class MovieProvider extends ContentProvider {
 
+    private final String LOG_TAG = MovieProvider.class.getSimpleName();
+
     // The URI Matcher used by this content provider.
     private static final UriMatcher sUriMatcher = buildUriMatcher();
     private MovieDbHelper mOpenHelper;
@@ -174,6 +176,22 @@ public class MovieProvider extends ContentProvider {
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         final int match = sUriMatcher.match(uri);
         switch (match) {
+            case MOVIE:
+                db.beginTransaction();
+                int cnt = 0;
+                try {
+                    for (ContentValues value : values) {
+                        long _id = db.insert(MovieContract.MovieEntry.TABLE_NAME, null, value);
+                        if (_id != -1) {
+                            cnt++;
+                        }
+                    }
+                    db.setTransactionSuccessful();
+                } finally {
+                    db.endTransaction();
+                }
+                getContext().getContentResolver().notifyChange(uri, null);
+                return cnt;
             case MOVIE_DETAILS:
                 db.beginTransaction();
                 int returnCount = 0;

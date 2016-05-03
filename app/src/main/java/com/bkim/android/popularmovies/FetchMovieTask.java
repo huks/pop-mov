@@ -84,6 +84,8 @@ public class FetchMovieTask extends AsyncTask<String, Void, Void> {
 
     private void getMovieDataFromJson(String boxofficeJsonStr, String sortSetting) throws JSONException {
 
+        Log.d(LOG_TAG, "getMovieDataFromJson()!!!!");
+
         // These are the names of the JSON objects that need to be extracted.
         final String TMDB_RESULTS = "results"; // "Boxoffice" list
         final String TMDB_ID = "id";
@@ -139,6 +141,8 @@ public class FetchMovieTask extends AsyncTask<String, Void, Void> {
                 cvVector.toArray(cvArray);
 
                 inserted = mContext.getContentResolver().bulkInsert(MovieEntry.CONTENT_URI, cvArray);
+
+                Log.d(LOG_TAG, cvVector.size() + " cvVector added to database!!!!");
             }
 
         } catch (JSONException e) {
@@ -150,6 +154,8 @@ public class FetchMovieTask extends AsyncTask<String, Void, Void> {
 
     @Override
     protected Void doInBackground(String... params) {
+
+        Log.d(LOG_TAG, "doInBackground("+params+")!!!!");
 
         // If there's no SORTING_PARAM(like "popularity.desc"), return null. Verify size of params.
         if (params.length == 0) {
@@ -219,6 +225,7 @@ public class FetchMovieTask extends AsyncTask<String, Void, Void> {
                 return null;
             }
             boxofficeJsonStr = buffer.toString();
+            Log.d(LOG_TAG, "boxofficeJsonStr!!!!: " + boxofficeJsonStr);
             getMovieDataFromJson(boxofficeJsonStr, sortQuery);
 
         } catch (IOException e) {
