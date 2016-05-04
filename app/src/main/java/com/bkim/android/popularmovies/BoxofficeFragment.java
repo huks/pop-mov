@@ -1,5 +1,6 @@
 package com.bkim.android.popularmovies;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
@@ -16,6 +17,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.bkim.android.popularmovies.data.MovieContract;
@@ -25,6 +27,28 @@ public class BoxofficeFragment extends Fragment implements LoaderManager.LoaderC
     private final String LOG_TAG = BoxofficeFragment.class.getSimpleName();
 
     private static final int BOXOFFICE_LOADER = 0;
+    // For the boxoffice view we're showing only a small subset of the stored data.
+    // Specify the columns we need.
+    private static final String[] BOXOFFICE_COLUMNS = {
+            MovieContract.MovieEntry._ID,
+            MovieContract.MovieEntry.COLUMN_MOVIE_ID,
+            MovieContract.MovieEntry.COLUMN_TITLE,
+            MovieContract.MovieEntry.COLUMN_POSTER,
+            MovieContract.MovieEntry.COLUMN_SYNOPSIS,
+            MovieContract.MovieEntry.COLUMN_RATING,
+            MovieContract.MovieEntry.COLUMN_DATE
+    };
+
+    // These indices are tied to BOXOFFICE_COLUMNS. If BOXOFFICE_COLUMNS changes, these
+    // must change.
+    static final int COL_ID = 0;
+    static final int COL_MOVIE_ID = 1;
+    static final int COL_MOVIE_TITLE = 2;
+    static final int COL_MOVIE_POSTER = 3;
+    static final int COL_MOVIE_SYNOPSIS = 4;
+    static final int COL_MOVIE_RATING = 5;
+    static final int COL_MOVIE_DATE = 6;
+
     private BoxofficeAdapter mBoxofficeAdapter;
 
     public BoxofficeFragment() {
@@ -67,6 +91,21 @@ public class BoxofficeFragment extends Fragment implements LoaderManager.LoaderC
         ListView listView = (ListView) rootView.findViewById(R.id.listview_boxoffice);
         listView.setAdapter(mBoxofficeAdapter);
 
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                Cursor cursor = (Cursor) adapterView.getItemAtPosition(position);
+                Log.d(LOG_TAG, "position: " + position + " is clicked!!!!");
+                if (cursor != null) {
+                    Intent intent = new Intent(getActivity(), DetailActivity.class)
+                            .setData(MovieContract.MovieEntry.buildMovieUri()
+                            );
+                    startActivity(intent);
+                }
+            }
+        });
+
         return rootView;
     }
 
@@ -98,7 +137,7 @@ public class BoxofficeFragment extends Fragment implements LoaderManager.LoaderC
 
         return new CursorLoader(getActivity(),
                 movieUri,
-                null,
+                BOXOFFICE_COLUMNS,
                 null,
                 null,
                 null);
@@ -106,14 +145,13 @@ public class BoxofficeFragment extends Fragment implements LoaderManager.LoaderC
 
     @Override
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
-        Log.d(LOG_TAG, "onLoadFinished()!!!!");
+//        Log.d(LOG_TAG, "onLoadFinished()!!!!");
         mBoxofficeAdapter.swapCursor(cursor);
-        Log.d(LOG_TAG, "swapCursor()!!!!");
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> cursorLoader) {
-        Log.d(LOG_TAG, "onLoaderReset()!!!!");
+//        Log.d(LOG_TAG, "onLoaderReset()!!!!");
         mBoxofficeAdapter.swapCursor(null);
     }
 }
