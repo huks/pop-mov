@@ -46,6 +46,14 @@ public class MovieContract {
         public static Uri buildMovieUri() {
             return CONTENT_URI;
         }
+
+        public static Uri buildMovieWithId(String id) {
+            return CONTENT_URI.buildUpon().appendPath(id).build();
+        }
+
+        public static String getFooFromUri(Uri uri) {
+            return uri.getPathSegments().get(1);
+        }
     }
 
     /* Inner class that defines the table contents of the movie details table */
@@ -69,6 +77,10 @@ public class MovieContract {
 
         public static Uri buildMovieDetailsUri(long id) {
             return ContentUris.withAppendedId(CONTENT_URI, id);
+        }
+
+        public static String getMovieKeyFromUri(Uri uri) {
+            return uri.getPathSegments().get(1);
         }
     }
 }

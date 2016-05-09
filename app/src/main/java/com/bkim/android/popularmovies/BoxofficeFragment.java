@@ -99,7 +99,7 @@ public class BoxofficeFragment extends Fragment implements LoaderManager.LoaderC
                 Log.d(LOG_TAG, "position: " + position + " is clicked!!!!");
                 if (cursor != null) {
                     Intent intent = new Intent(getActivity(), DetailActivity.class)
-                            .setData(MovieContract.MovieEntry.buildMovieUri()
+                            .setData(MovieContract.MovieEntry.buildMovieWithId(cursor.getString(COL_MOVIE_ID))
                             );
                     startActivity(intent);
                 }
