@@ -27,27 +27,25 @@ public class BoxofficeFragment extends Fragment implements LoaderManager.LoaderC
     private final String LOG_TAG = BoxofficeFragment.class.getSimpleName();
 
     private static final int BOXOFFICE_LOADER = 0;
-    // For the boxoffice view we're showing only a small subset of the stored data.
-    // Specify the columns we need.
-    private static final String[] BOXOFFICE_COLUMNS = {
+
+    private static final String[] MOVIE_COLUMNS = {
             MovieContract.MovieEntry._ID,
             MovieContract.MovieEntry.COLUMN_MOVIE_ID,
-            MovieContract.MovieEntry.COLUMN_TITLE,
-            MovieContract.MovieEntry.COLUMN_POSTER,
-            MovieContract.MovieEntry.COLUMN_SYNOPSIS,
-            MovieContract.MovieEntry.COLUMN_RATING,
-            MovieContract.MovieEntry.COLUMN_DATE
+            MovieContract.MovieEntry.COLUMN_ORIGINAL_TITLE,
+            MovieContract.MovieEntry.COLUMN_POSTER_PATH,
+            MovieContract.MovieEntry.COLUMN_OVERVIEW,
+            MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE,
+            MovieContract.MovieEntry.COLUMN_RELEASE_DATE
     };
 
     // These indices are tied to BOXOFFICE_COLUMNS. If BOXOFFICE_COLUMNS changes, these
     // must change.
-    static final int COL_ID = 0;
-    static final int COL_MOVIE_ID = 1;
-    static final int COL_MOVIE_TITLE = 2;
-    static final int COL_MOVIE_POSTER = 3;
-    static final int COL_MOVIE_SYNOPSIS = 4;
-    static final int COL_MOVIE_RATING = 5;
-    static final int COL_MOVIE_DATE = 6;
+    public static final int COL_MOVIE_ID = 0;;
+    public static final int COL_ORIGINAL_TITLE = 1;
+    public static final int COL_POSTER_PATH = 2;
+    public static final int COL_OVERVIEW = 3;
+    public static final int COL_VOTE_AVERAGE = 4;
+    public static final int COL_RELEASE_DATE = 5;
 
     private BoxofficeAdapter mBoxofficeAdapter;
 
@@ -95,14 +93,14 @@ public class BoxofficeFragment extends Fragment implements LoaderManager.LoaderC
 
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                Cursor cursor = (Cursor) adapterView.getItemAtPosition(position);
-                Log.d(LOG_TAG, "position: " + position + " is clicked!!!!");
-                if (cursor != null) {
-                    Intent intent = new Intent(getActivity(), DetailActivity.class)
-                            .setData(MovieContract.MovieEntry.buildMovieWithId(cursor.getString(COL_MOVIE_ID))
-                            );
-                    startActivity(intent);
-                }
+//                Cursor cursor = (Cursor) adapterView.getItemAtPosition(position);
+//                Log.d(LOG_TAG, "position: " + position + " is clicked!!!!");
+//                if (cursor != null) {
+//                    Intent intent = new Intent(getActivity(), DetailActivity.class)
+//                            .setData(MovieContract.MovieEntry.buildMovieWithId(cursor.getString(COL_MOVIE_ID))
+//                            );
+//                    startActivity(intent);
+//                }
             }
         });
 
@@ -121,6 +119,7 @@ public class BoxofficeFragment extends Fragment implements LoaderManager.LoaderC
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
         String sorting = prefs.getString(
                 getString(R.string.pref_sorting_key), getString(R.string.pref_sorting_popularity));
+        Log.d(LOG_TAG, "sorting!!!!: " + sorting);
         movieTask.execute(sorting);
     }
 
@@ -137,7 +136,7 @@ public class BoxofficeFragment extends Fragment implements LoaderManager.LoaderC
 
         return new CursorLoader(getActivity(),
                 movieUri,
-                BOXOFFICE_COLUMNS,
+                MOVIE_COLUMNS,
                 null,
                 null,
                 null);

@@ -37,50 +37,54 @@ public class MovieContract {
         public static final String TABLE_NAME = "movie";
 
         public static final String COLUMN_MOVIE_ID = "movie_id";
-        public static final String COLUMN_TITLE = "title";
-        public static final String COLUMN_POSTER = "poster";
-        public static final String COLUMN_SYNOPSIS = "synopsis";
-        public static final String COLUMN_RATING = "rating";
-        public static final String COLUMN_DATE = "date";
+        public static final String COLUMN_ORIGINAL_TITLE = "original_title";
+        public static final String COLUMN_POSTER_PATH = "poster_path";
+        public static final String COLUMN_OVERVIEW = "overview";
+        public static final String COLUMN_VOTE_AVERAGE = "vote_average";
+        public static final String COLUMN_RELEASE_DATE = "release_date";
 
-        public static Uri buildMovieUri() {
-            return CONTENT_URI;
-        }
-
-        public static Uri buildMovieWithId(String id) {
-            return CONTENT_URI.buildUpon().appendPath(id).build();
-        }
-
-        public static String getFooFromUri(Uri uri) {
-            return uri.getPathSegments().get(1);
-        }
-    }
-
-    /* Inner class that defines the table contents of the movie details table */
-    public static final class MovieDetailsEntry implements BaseColumns {
-
-        public static final Uri CONTENT_URI =
-                BASE_CONTENT_URI.buildUpon().appendPath(PATH_MOVIE_DETAILS).build();
-
-        public static final String CONTENT_TYPE =
-                ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_MOVIE_DETAILS;
-        public static final String CONTENT_ITEM_TYPE =
-                ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_MOVIE_DETAILS;
-
-        public static final String TABLE_NAME = "movie_details";
-
-        public static final String COLUMN_MOV_KEY = "movie_id";
-
-        public static final String COLUMN_TRAILER = "movie_trailer";
-
-        public static final String COLUMN_REVIEW = "movie_review";
-
-        public static Uri buildMovieDetailsUri(long id) {
+        public static Uri buildMovieUri(long id) {
             return ContentUris.withAppendedId(CONTENT_URI, id);
         }
 
-        public static String getMovieKeyFromUri(Uri uri) {
-            return uri.getPathSegments().get(1);
-        }
+//        public static Uri buildMovieUri() {
+//            return CONTENT_URI;
+//        }
+//
+//        public static Uri buildMovieWithId(String id) {
+//            return CONTENT_URI.buildUpon().appendPath(id).build();
+//        }
+//
+//        public static String getFooFromUri(Uri uri) {
+//            return uri.getPathSegments().get(1);
+//        }
     }
+
+    /* Inner class that defines the table contents of the movie details table */
+//    public static final class MovieDetailsEntry implements BaseColumns {
+//
+//        public static final Uri CONTENT_URI =
+//                BASE_CONTENT_URI.buildUpon().appendPath(PATH_MOVIE_DETAILS).build();
+//
+//        public static final String CONTENT_TYPE =
+//                ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_MOVIE_DETAILS;
+//        public static final String CONTENT_ITEM_TYPE =
+//                ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_MOVIE_DETAILS;
+//
+//        public static final String TABLE_NAME = "movie_details";
+//
+//        public static final String COLUMN_MOV_KEY = "movie_id";
+//
+//        public static final String COLUMN_TRAILER = "movie_trailer";
+//
+//        public static final String COLUMN_REVIEW = "movie_review";
+
+//        public static Uri buildMovieDetailsUri(long id) {
+//            return ContentUris.withAppendedId(CONTENT_URI, id);
+//        }
+//
+//        public static String getMovieKeyFromUri(Uri uri) {
+//            return uri.getPathSegments().get(1);
+//        }
+//    }
 }
